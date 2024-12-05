@@ -17,7 +17,7 @@ for i in range(n):
     print ("Enter marks for student "+str(i+1))
     marks = []
     for j in range(6):
-        mark = float(input("Semster "+str(j+1)+": "))
+        mark = float(input("Semester "+str(j+1)+": "))
         marks.append(mark)
     total_marks = sum(marks)
     percentage = total_marks/6 
