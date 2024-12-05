@@ -1,0 +1,32 @@
+def cal_grade(percentage):
+    if percentage > 90:
+        return "A"
+    elif percentage >80:
+        return "B"
+    elif percentage >70:
+        return "C"
+    elif percentage > 60:
+        return "D"
+    else:
+        return "F"
+
+n = int(input("Enter the number of students= "))
+students = []
+
+for i in range(n):
+    print ("Enter marks for student "+str(i+1))
+    marks = []
+    for j in range(6):
+        mark = float(input("Semster "+str(j+1)+": "))
+        marks.append(mark)
+    total_marks = sum(marks)
+    percentage = total_marks/6 
+    grade = cal_grade(percentage)
+    students.append({"Student":i+1,"Marks":marks,"Percentage":percentage,"Grade":grade})
+                    
+print("\nStudent Result->:")
+for student in students:
+    print("\nStudent "+str(student['Student'])+":")
+    print("  Marks: "+str(student['Marks']))
+    print("  Percentage: {:.2f}%".format(student['Percentage']))
+    print("  Grade: "+str(student['Grade']))
