@@ -3,7 +3,7 @@ import math
 def math_prob(a,b,c):
     if a==0:
         if b==0:
-            return ("No solution: both a and b are zero")
+            return "No solution: both a and b are zero"
         return "Linear solution: x="+str(-c/b)
     
     d=b**2-4*a*c
