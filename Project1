@@ -1,11 +1,11 @@
-def cal_grade(percentage):
-    if percentage > 90:
+def cal_grade(avg_percentage):
+    if avg_percentage > 90:
         return "A"
-    elif percentage >80:
+    elif avg_percentage >80:
         return "B"
-    elif percentage >70:
+    elif avg_percentage >70:
         return "C"
-    elif percentage > 60:
+    elif avg_percentage > 60:
         return "D"
     else:
         return "F"
@@ -20,13 +20,13 @@ for i in range(n):
         mark = float(input("Semester "+str(j+1)+": "))
         marks.append(mark)
     total_marks = sum(marks)
-    percentage = total_marks/6 
-    grade = cal_grade(percentage)
-    students.append({"Student":i+1,"Marks":marks,"Percentage":percentage,"Grade":grade})
+    avg_percentage = total_marks/6 
+    grade = cal_grade(avg_percentage)
+    students.append({"Student":i+1,"Marks":marks,"Average_Percentage":avg_percentage,"Grade":grade})
                     
 print("\nStudent Result->:")
 for student in students:
     print("\nStudent "+str(student['Student'])+":")
     print("  Marks: "+str(student['Marks']))
-    print("  Percentage: {:.2f}%".format(student['Percentage']))
+    print("  Average Percentage: {:.2f}%".format(student['Average_Percentage']))
     print("  Grade: "+str(student['Grade']))
