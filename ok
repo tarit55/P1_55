@@ -1,0 +1,97 @@
+import cv2
+import pytesseract
+import mysql.connector
+import re
+from datetime import datetime
+
+# ✅ Set Tesseract OCR Path (Make sure Tesseract is installed)
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+
+# ✅ Connect to MySQL Database
+conn = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="your_password",  # Change to your actual MySQL password
+    database="attendance_db"
+)
+cursor = conn.cursor()
+
+def preprocess_image(image_path):
+    """Enhance image quality for better OCR accuracy"""
+    img = cv2.imread(image_path)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # Convert to grayscale
+    img = cv2.threshold(img, 150, 255, cv2.THRESH_BINARY)[1]  # Apply thresholding
+    return img
+
+def extract_text_from_id_card(image_path):
+    """Extracts text from an ID card image"""
+    img = preprocess_image(image_path)
+    text = pytesseract.image_to_string(img)
+
+    print("✅ Extracted Text:\n", text)  # Debugging
+    return text
+
+def extract_details(text):
+    """Extracts Name, Department, and Mobile Number from OCR output"""
+    lines = text.split("\n")  # Split text into lines
+    extracted_data = [line.strip() for line in lines if line.strip()]
+
+    name = extracted_data[0] if len(extracted_data) > 0 else "Unknown"
+    department = extracted_data[1] if len(extracted_data) > 1 else "Unknown"
+
+    phone_numbers = re.findall(r'\d{10}', text)  # Extract 10-digit numbers
+    mobile1 = phone_numbers[0] if len(phone_numbers) > 0 else "Not Found"
+    mobile2 = phone_numbers[1] if len(phone_numbers) > 1 else "N/A"
+
+    print(f"✅ Name: {name}")
+    print(f"✅ Department: {department}")
+    print(f"✅ Mobile1: {mobile1}")
+    print(f"✅ Mobile2: {mobile2}")
+
+    return name, department, mobile1, mobile2
+
+def check_user_in_database(name, mobile):
+    """Check if user exists in the database"""
+    name = name.strip().lower()  # Clean name format
+    mobile = mobile.strip()  # Clean mobile format
+
+    query = "SELECT * FROM employees WHERE LOWER(name) = %s AND (mobile1 = %s OR mobile2 = %s)"
+    cursor.execute(query, (name, mobile, mobile))
+    result = cursor.fetchone()
+
+    if result:
+        print(f"✅ User Found: {name}, Attendance Marked!")
+        mark_attendance(name)
+        return True
+    else:
+        print(f"❌ User Not Found: {name}, {mobile}")
+        return False
+
+def mark_attendance(name):
+    """Mark attendance in the database"""
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    
+    query = "INSERT INTO attendance (name, timestamp) VALUES (%s, %s)"
+    cursor.execute(query, (name, timestamp))
+    conn.commit()
+    
+    print(f"✅ Attendance Marked for {name} at {timestamp}")
+
+# ✅ Capture Attendance
+def capture_attendance(image_path):
+    text = extract_text_from_id_card(image_path)
+    name, department, mobile1, mobile2 = extract_details(text)
+
+    # ✅ Try with first mobile number
+    if not check_user_in_database(name, mobile1):
+        # ✅ If first mobile fails, try second number
+        check_user_in_database(name, mobile2)
+
+# ✅ Run the Attendance System
+if __name__ == "__main__":
+    image_path = "id_card_sample.jpg"  # Change this to your actual image file
+    capture_attendance(image_path)
+
+# ✅ Close Database Connection
+cursor.close()
+conn.close()
